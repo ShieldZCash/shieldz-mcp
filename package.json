@@ -1,0 +1,28 @@
+{
+  "name": "@shieldz/mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol (MCP) server for Shieldz — let AI agents create and look up non-custodial crypto payment invoices.",
+  "type": "module",
+  "bin": { "shieldz-mcp": "dist/index.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "model-context-protocol", "shieldz", "crypto", "payments", "ai", "agent", "non-custodial"],
+  "license": "MIT",
+  "author": "Deniz Yanbollu (@dnzynbl)",
+  "homepage": "https://shieldz.cash",
+  "repository": { "type": "git", "url": "git+https://github.com/ShieldZCash/shieldz-mcp.git" },
+  "bugs": { "url": "https://github.com/ShieldZCash/shieldz-mcp/issues" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@shieldz/sdk": "^0.2.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^20.0.0"
+  }
+}
