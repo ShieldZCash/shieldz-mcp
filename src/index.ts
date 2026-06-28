@@ -24,34 +24,37 @@ async function call(path: string, init?: RequestInit) {
 }
 
 const Chain = z
-  .enum(["BASE", "ARBITRUM", "ARB", "OPTIMISM", "OP", "POLYGON", "POLY", "ETHEREUM", "ETH"])
+  .enum(["base", "arbitrum", "optimism", "polygon", "ethereum"])
   .describe("Settlement chain. Funds settle to your own wallet on this chain.");
 const Asset = z.enum(["USDC", "USDT"]).describe("Stablecoin to settle in");
-const Address = z.string().regex(/^0x[0-9a-fA-F]{40}$/, "must be a 0x EVM address").describe("Your wallet address; funds settle here. Shieldz never holds them.");
+const Address = z
+  .string()
+  .regex(/^0x[0-9a-fA-F]{40}$/, "must be a 0x EVM address")
+  .describe("Destination wallet; funds settle here. Shieldz never holds them.");
 
-const server = new McpServer({ name: "shieldz", version: "0.2.0" });
+const server = new McpServer({ name: "shieldz", version: "0.3.0" });
 
 // ─── Keyless, zero-setup tools (no API key required) ──────────────────────
 // These let an agent start accepting crypto with nothing but a wallet address.
 
 server.tool(
   "create_payment_link",
-  "Create a one-time crypto payment link with ZERO setup — no account, no API key. Just give a destination wallet address and an amount; get back a shareable pay_url, an embeddable button, and a manage_url. Non-custodial: funds settle directly to the address you provide. Optionally pass an email to be able to claim a full dashboard later.",
+  "Create a one-time crypto payment link with ZERO setup, no account, no API key. Give a destination wallet address and an amount; get back a shareable pay_url, an embeddable button, and a manage_url. Non-custodial: funds settle directly to the address you provide. Optionally pass an email so the owner can claim a full dashboard later.",
   {
-    settlement_address: Address,
-    amount_usd_cents: z.number().int().min(100).max(10_000_000).describe("Amount in USD cents (100 = $1.00)"),
-    settlement_chain: Chain.optional().describe("Defaults to BASE"),
-    settlement_asset: Asset.optional().describe("Defaults to USDC"),
+    address: Address,
+    amount_usd: z.number().positive().max(100_000).describe("Amount in USD, e.g. 49 for $49.00"),
+    chain: Chain.optional().describe("Defaults to base"),
+    asset: Asset.optional().describe("Defaults to USDC"),
     memo: z.string().max(500).optional().describe("Description shown on the checkout"),
-    email: z.string().email().optional().describe("Optional — lets the owner claim a dashboard later via magic link"),
+    email: z.string().email().optional().describe("Optional, lets the owner claim a dashboard later"),
   },
   async (a) =>
     json(
       await call("/api/v1/links", {
         method: "POST",
         body: JSON.stringify({
-          settlement: { chain: a.settlement_chain ?? "BASE", asset: a.settlement_asset ?? "USDC", address: a.settlement_address },
-          amount_usd_cents: a.amount_usd_cents,
+          settlement: { chain: a.chain ?? "base", asset: a.asset ?? "USDC", address: a.address },
+          amount_usd_cents: Math.round(a.amount_usd * 100),
           memo: a.memo,
           email: a.email,
         }),
@@ -61,26 +64,30 @@ server.tool(
 
 server.tool(
   "create_tip_jar",
-  "Create a reusable 'pay what you want' tip jar with ZERO setup — no account, no API key. The payer chooses the amount. Returns a shareable /tip url, an embeddable button, and a manage_url. Idempotent per wallet address: calling again updates the same tip jar. Non-custodial: funds settle directly to the address you provide.",
+  "Create a reusable 'pay what you want' tip jar with ZERO setup, no account, no API key. The payer chooses the amount. Returns a shareable /tip url, an embeddable button, and a manage_url. Idempotent per wallet address: calling again updates the same tip jar. Non-custodial: funds settle directly to the address you provide.",
   {
-    settlement_address: Address,
-    settlement_chain: Chain.optional().describe("Defaults to BASE"),
-    settlement_asset: Asset.optional().describe("Defaults to USDC"),
+    address: Address,
+    chain: Chain.optional().describe("Defaults to base"),
+    asset: Asset.optional().describe("Defaults to USDC"),
     title: z.string().max(120).optional().describe("Heading shown on the tip page, e.g. 'Buy me a coffee'"),
     description: z.string().max(4000).optional(),
-    suggested_amounts_usd_cents: z.array(z.number().int().min(100).max(10_000_000)).max(8).optional().describe("Preset amount buttons, in USD cents"),
+    suggested_amounts_usd: z
+      .array(z.number().positive().max(100_000))
+      .max(8)
+      .optional()
+      .describe("Preset amount buttons in USD, e.g. [3, 5, 10]"),
     slug: z.string().regex(/^[a-z0-9][a-z0-9_-]{1,62}$/).optional().describe("Optional custom URL slug; auto-generated if omitted"),
-    email: z.string().email().optional().describe("Optional — lets the owner claim a dashboard later via magic link"),
+    email: z.string().email().optional().describe("Optional, lets the owner claim a dashboard later"),
   },
   async (a) =>
     json(
       await call("/api/v1/tip-jars", {
         method: "POST",
         body: JSON.stringify({
-          settlement: { chain: a.settlement_chain ?? "BASE", asset: a.settlement_asset ?? "USDC", address: a.settlement_address },
+          settlement: { chain: a.chain ?? "base", asset: a.asset ?? "USDC", address: a.address },
           title: a.title,
           description: a.description,
-          suggested_amounts_usd_cents: a.suggested_amounts_usd_cents,
+          suggested_amounts_usd_cents: a.suggested_amounts_usd?.map((v) => Math.round(v * 100)),
           slug: a.slug,
           email: a.email,
         }),
@@ -135,5 +142,5 @@ if (apiKey) {
 
 await server.connect(new StdioServerTransport());
 console.error(
-  `shieldz-mcp running on stdio — base ${BASE}${apiKey ? " (API key set: invoice tools enabled)" : " (keyless mode)"}`,
+  `shieldz-mcp running on stdio, base ${BASE}${apiKey ? " (API key set: invoice tools enabled)" : " (keyless mode)"}`,
 );

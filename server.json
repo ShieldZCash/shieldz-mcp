@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.json",
+  "name": "io.github.ShieldZCash/mcp",
+  "description": "Keyless, non-custodial crypto payments for AI agents. Create payment links and tip jars with only a destination wallet address, no account and no API key. OFAC-screened and rate-limited.",
+  "version": "0.3.0",
+  "repository": {
+    "url": "https://github.com/ShieldZCash/shieldz-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://shieldz.cash/agents",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@shieldz/mcp",
+      "version": "0.3.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "SHIELDZ_API_KEY",
+          "description": "Optional. Set a sk_live_/sk_test_ key to additionally enable full invoice management tools. Omit for keyless mode.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://shieldz.cash/mcp"
+    }
+  ]
+}

@@ -10,11 +10,19 @@ Funds always settle to the wallet address you provide. Shieldz never holds your 
 
 Give a destination wallet address and start accepting crypto in one call:
 
-- `create_payment_link` — a one-time payment link (shareable URL + embeddable button + QR).
-- `create_tip_jar` — a reusable "pay what you want" page; the payer chooses the amount.
+- `create_payment_link` — a one-time payment link (shareable URL + embeddable button + QR). Args: `address`, `amount_usd`, optional `chain` (default `base`), `asset` (default `USDC`), `memo`, `email`.
+- `create_tip_jar` — a reusable "pay what you want" page; the payer chooses the amount. Args: `address`, optional `chain`, `asset`, `title`, `suggested_amounts_usd`, `slug`, `email`.
 - `get_account_status` — look up settlement details, tip jars, totals, and invoices by `manage_token`.
 
 These work with **zero configuration**. Pass an optional `email` so the owner can claim a full dashboard later via magic link.
+
+**Remote (no install)** — point any MCP client at the hosted server:
+
+```json
+{ "mcpServers": { "shieldz": { "url": "https://shieldz.cash/mcp" } } }
+```
+
+**Local (stdio)** — run via npx:
 
 ```json
 {

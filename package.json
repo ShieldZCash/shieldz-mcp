@@ -1,7 +1,8 @@
 {
   "name": "@shieldz/mcp",
-  "version": "0.2.0",
-  "description": "Model Context Protocol (MCP) server for Shieldz — let AI agents create and look up non-custodial crypto payment invoices.",
+  "version": "0.3.0",
+  "mcpName": "io.github.ShieldZCash/mcp",
+  "description": "Model Context Protocol (MCP) server for Shieldz. Let AI agents accept non-custodial crypto payments with no API key: keyless payment links and tip jars.",
   "type": "module",
   "bin": { "shieldz-mcp": "dist/index.js" },
   "files": ["dist", "README.md", "LICENSE"],
