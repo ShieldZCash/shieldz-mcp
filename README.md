@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@shieldz/mcp.svg)](https://www.npmjs.com/package/@shieldz/mcp)
 
-**Model Context Protocol (MCP) server for [Shieldz](https://shieldz.cash).** Lets an AI agent (Claude, etc.) accept non-custodial crypto payments.
+**Model Context Protocol (MCP) server for [Shieldz](https://shieldz.cash).** Lets an AI agent (Claude, etc.) accept non-custodial crypto payments and sell digital products.
 
 Funds always settle to the wallet address you provide. Shieldz never holds your keys.
 
@@ -12,6 +12,7 @@ Give a destination wallet address and start accepting crypto in one call:
 
 - `create_payment_link` — a one-time payment link (shareable URL + embeddable button + QR). Args: `address`, `amount_usd`, optional `chain` (default `base`), `asset` (default `USDC`), `memo`, `email`.
 - `create_tip_jar` — a reusable "pay what you want" page; the payer chooses the amount. Args: `address`, optional `chain`, `asset`, `title`, `suggested_amounts_usd`, `slug`, `email`.
+- `create_unlock` — **sell a digital product**: a pay-to-unlock page for a file link, license key, or secret text (up to 100k chars). The buyer pays and the payload is revealed on their paid confirmation, automatically. Args: `address`, `price_usd`, `payload`, `aup_accepted`, optional `title`, `description`, `chain`, `asset`, `email`. (To deliver an uploaded file up to 10 MB, post multipart to `/api/v1/unlocks`.)
 - `get_account_status` — look up settlement details, tip jars, totals, and invoices by `manage_token`.
 
 These work with **zero configuration**. Pass an optional `email` so the owner can claim a full dashboard later via magic link.

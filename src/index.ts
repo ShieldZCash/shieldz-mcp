@@ -2,7 +2,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import Shieldz from "@shieldz/sdk";
+// @shieldz/sdk is only needed for the API-key invoice tools. It is imported
+// lazily (below, when SHIELDZ_API_KEY is set) so keyless mode boots instantly
+// without loading it — the common case, and what directory scanners launch.
 
 const BASE = (process.env.SHIELDZ_BASE_URL || "https://shieldz.cash").replace(/\/+$/, "");
 const apiKey = process.env.SHIELDZ_API_KEY;
@@ -32,7 +34,7 @@ const Address = z
   .regex(/^0x[0-9a-fA-F]{40}$/, "must be a 0x EVM address")
   .describe("Destination wallet; funds settle here. Shieldz never holds them.");
 
-const server = new McpServer({ name: "shieldz", version: "0.3.0" });
+const server = new McpServer({ name: "shieldz", version: "0.4.0" });
 
 // ─── Keyless, zero-setup tools (no API key required) ──────────────────────
 // These let an agent start accepting crypto with nothing but a wallet address.
@@ -96,9 +98,42 @@ server.tool(
 );
 
 server.tool(
+  "create_unlock",
+  "Create a keyless pay-to-unlock page with ZERO setup, no account, no API key: sell a file link, license key, or secret text (up to 100,000 chars) for a fixed price. The buyer pays the set USD price straight to your wallet and the payload is revealed on their paid confirmation, never before. Non-custodial. (To deliver an actual uploaded file up to 10MB, use the multipart HTTP API at /api/v1/unlocks.) IMPORTANT: confirm with your principal that the content is not adult, illegal, or non-consensual, then pass aup_accepted=true, otherwise the call fails.",
+  {
+    address: Address,
+    price_usd: z.number().positive().max(100_000).describe("Unlock price in USD, e.g. 5 for $5.00"),
+    payload: z.string().min(1).max(100_000).describe("The secret to reveal after payment: a URL or text. Never shown before payment."),
+    title: z.string().max(120).optional().describe("What the buyer is purchasing, shown on the paywall"),
+    description: z.string().max(500).optional().describe("Short pitch shown on the paywall"),
+    chain: Chain.optional().describe("Defaults to base"),
+    asset: Asset.optional().describe("Defaults to USDC"),
+    email: z.string().email().optional().describe("Optional, lets the owner claim a dashboard later"),
+    aup_accepted: z.boolean().describe("Must be true: asserts the content complies with the acceptable-use policy (no adult, illegal, or non-consensual content)."),
+  },
+  async (a) =>
+    json(
+      await call("/api/v1/unlocks", {
+        method: "POST",
+        body: JSON.stringify({
+          to: a.address,
+          chain: a.chain ?? "base",
+          asset: a.asset ?? "USDC",
+          price_usd_cents: Math.round(a.price_usd * 100),
+          payload: a.payload,
+          title: a.title,
+          description: a.description,
+          email: a.email,
+          aup_accepted: a.aup_accepted === true,
+        }),
+      }),
+    ),
+);
+
+server.tool(
   "get_account_status",
-  "Look up a keyless Shieldz account by its manage_token (returned when you create a payment link or tip jar). Returns settlement details, tip jars, totals (paid/pending), and the full invoice list as structured JSON.",
-  { manage_token: z.string().describe("The manage_token from create_payment_link / create_tip_jar") },
+  "Look up a keyless Shieldz account by its manage_token (returned when you create a payment link, tip jar, or unlock). Returns settlement details, tip jars, totals (paid/pending), and the full invoice list as structured JSON.",
+  { manage_token: z.string().describe("The manage_token from create_payment_link / create_tip_jar / create_unlock") },
   async ({ manage_token }) => json(await call(`/a/${encodeURIComponent(manage_token)}.json`)),
 );
 
@@ -106,6 +141,7 @@ server.tool(
 // For merchants with a full account: richer invoice management via @shieldz/sdk.
 
 if (apiKey) {
+  const { default: Shieldz } = await import("@shieldz/sdk");
   const shieldz = new Shieldz(apiKey);
 
   server.tool(
