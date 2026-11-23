@@ -1,0 +1,11 @@
+{
+  "name": "shieldz-payments",
+  "version": "0.4.0",
+  "description": "Accept crypto payments from an AI agent: payment links, tip jars and pay-to-unlock digital products paid straight to your own wallet. Non-custodial, $0 platform fee, no API key needed.",
+  "author": { "name": "Shieldz", "url": "https://shieldz.cash" },
+  "homepage": "https://shieldz.cash/agents",
+  "repository": "https://github.com/ShieldZCash/shieldz-mcp",
+  "license": "MIT",
+  "privacyPolicyUrl": "https://shieldz.cash/privacy",
+  "keywords": ["crypto", "payments", "payment-gateway", "usdc", "bitcoin", "non-custodial"]
+}

@@ -6,6 +6,18 @@
 
 Funds always settle to the wallet address you provide. Shieldz never holds your keys.
 
+## Install in Claude Code, Codex or Gemini CLI
+
+```
+/plugin install shieldz-payments --marketplace ShieldZCash/shieldz-mcp
+```
+
+```
+gemini extensions install https://github.com/ShieldZCash/shieldz-mcp
+```
+
+The repo also ships an agent skill at [`skills/shieldz-payments/SKILL.md`](skills/shieldz-payments/SKILL.md).
+
 ## Keyless tools (no account, no API key)
 
 Give a destination wallet address and start accepting crypto in one call:

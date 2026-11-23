@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "shieldz": { "type": "http", "url": "https://shieldz.cash/mcp" }
+  }
+}

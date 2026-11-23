@@ -1,0 +1,9 @@
+{
+  "name": "shieldz-payments",
+  "version": "0.4.0",
+  "description": "Accept crypto payments from an AI agent: payment links, tip jars and pay-to-unlock digital products in USDC, USDT, BTC or ZEC, paid straight to your own wallet. Non-custodial, $0 platform fee, no API key needed.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "shieldz": { "type": "http", "url": "https://shieldz.cash/mcp" }
+  }
+}

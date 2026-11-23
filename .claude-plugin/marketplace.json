@@ -1,0 +1,14 @@
+{
+  "name": "shieldz-payments",
+  "owner": { "name": "Shieldz", "url": "https://shieldz.cash" },
+  "metadata": { "description": "Shieldz plugins: non-custodial crypto payments for AI agents." },
+  "plugins": [
+    {
+      "name": "shieldz-payments",
+      "source": "./",
+      "description": "Payment links, tip jars and pay-to-unlock products in USDC, USDT, BTC or ZEC, paid to your own wallet. No API key.",
+      "homepage": "https://shieldz.cash/agents",
+      "category": "finance"
+    }
+  ]
+}
